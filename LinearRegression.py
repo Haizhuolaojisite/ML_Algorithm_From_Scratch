@@ -1,5 +1,4 @@
 import numpy as np
-import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.datasets import make_regression
 import matplotlib.pyplot as plt
@@ -11,23 +10,31 @@ X, y = make_regression(n_samples=n_samples, n_features=n_features,
 X_fit, X_val, y_fit, y_val = train_test_split(X, y, test_size=.2, random_state=1)
 
 class LinearRegression:
-    def __init__(self, lr=0.001, n_iters=1000):
+    def __init__(self, lr=0.001, epochs=1000):
         self.lr = lr
-        self.n_iters = n_iters
+        self.epochs = epochs
         self.weights = None
         self.bias = None
 
     def fit(self, X, y):
-        n_samples, n_features = X.shape
-        self.weights = np.zeros(n_features)
+        '''
+        Gradient Descent with MSE as its cost function to update weights
+        :param X: observations
+        :param y: dependent variable
+        '''
+        # initialize weights and bias
+        n_observations = X.shape[0]
+        self.weights = np.zeros(X.shape[1])
         self.bias = 0
 
         tol = 1e-5
         prev_loss = 0
-        for i in range(self.n_iters):
-            y_pred = np.dot(X, self.weights) + self.bias
-            dw = (1 / n_samples) * (np.dot(X.T, (y_pred - y)))
-            db = (1 / n_samples) * (np.sum(y_pred - y))
+        for i in range(self.epochs):
+            y_pred = self.predict(X)
+            dw = (-2 / n_observations) * (np.dot(X.T, (y_pred - y)))
+            db = (-2 / n_observations) * (np.sum(y_pred - y))
+            # adjust the step size using a learning rate parameter
+            # The cross-validation can be used to find an ideal learning rate
             self.weights = self.weights - (self.lr * dw)
             self.bias = self.bias - (self.lr * db)
 
@@ -49,6 +56,10 @@ train_predictions = model.predict(X_fit)
 
 def mse(y, predictions):
     return np.mean(np.square(y - predictions))
+
+
+def rmse(y, predictions):
+    return np.sqrt(mse(y, predictions))
 
 
 print(mse(y_fit, train_predictions))
